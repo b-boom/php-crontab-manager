@@ -1,0 +1,18 @@
+{
+  "name": "bram/php-crontab-manager",
+  "description": "PHP library for managing Ubuntu Crontabs",
+  "type": "library",
+  "license": "GNU GPL",
+  "authors": [
+    {
+      "name": "Bram Eikelboom",
+      "email": "info@b-boom.nl"
+    }
+  ],
+  "require": {},
+  "autoload": {
+    "psr-4": {
+      "Crontab\\": "src/"
+    }
+  }
+}

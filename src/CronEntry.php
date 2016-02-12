@@ -26,7 +26,7 @@
  *
  */
 
-namespace php\manager\crontab;
+namespace Crontab;
 
 /**
  * Crontab Entry object
