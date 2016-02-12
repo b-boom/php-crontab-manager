@@ -3,6 +3,7 @@
   "description": "PHP library for managing Ubuntu Crontabs",
   "type": "library",
   "license": "GNU GPL",
+  "version": "1.0.0",
   "authors": [
     {
       "name": "Bram Eikelboom",
