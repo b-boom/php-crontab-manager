@@ -1,5 +1,5 @@
 {
-  "name": "bram/php-crontab-manager",
+  "name": "bboom/php-crontab-manager",
   "description": "PHP library for managing Ubuntu Crontabs",
   "type": "library",
   "license": "GNU GPL",
