@@ -124,7 +124,6 @@ class CronEntry
         if (!preg_match($regex, $jobSpec, $match)) {
             throw new \InvalidArgumentException('$jobSpec must be crontab compatibile entry');
         }
-        dd($match);
         list(, ,
             $minute,
             $hour,
