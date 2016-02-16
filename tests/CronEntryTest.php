@@ -3,7 +3,7 @@
 namespace tests\php\manager\crontab;
 
 use tests\php\manager\crontab\mock\MockCrontabManager;
-use php\manager\crontab\CronEntry;
+use Crontab\CronEntry;
 
 require_once dirname(__DIR__) . '/src/CronEntry.php';
 require_once __DIR__ . '/mock/MockCrontabManager.php';

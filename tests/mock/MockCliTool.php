@@ -2,7 +2,7 @@
 
 namespace tests\php\manager\crontab\mock;
 
-use php\manager\crontab\CliTool;
+use Crontab\CliTool;
 
 
 require_once dirname(dirname(__DIR__)) . '/src/CliTool.php';

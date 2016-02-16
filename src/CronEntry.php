@@ -36,84 +36,78 @@ namespace Crontab;
 class CronEntry
 {
     /**
+     * @var array|null
+     */
+    public $comments = null;
+    /**
+     * @var string|null
+     */
+    public $lineComment = null;
+    /**
      * Minute (0 - 59)
      *
      * @var string
      */
     private $minute = 0;
-
     /**
      * Hour (0 - 23)
      *
      * @var string
      */
     private $hour = 10;
-
     /**
      * Day of Month (1 - 31)
      *
      * @var string
      */
     private $dayOfMonth = '*';
-
     /**
      * Month (1 - 12) OR jan,feb,mar,apr...
      *
      * @var string
      */
     private $month = '*';
-
     /**
      * Day of week (0 - 6) (Sunday=0 or 7) OR sun,mon,tue,wed,thu,fri,sat
      *
      * @var string
      */
     private $dayOfWeek = '*';
-
     /**
      * Job to be done
      *
      * @var string
      */
     private $job = null;
-
     /**
      * Group of job
      *
      * @var string|null
      */
     private $group = null;
-
     /**
      * Cron manager
      *
      * @var CrontabManager|null
      */
     private $_manager;
-
     /**
      * @var string
      */
     private $_root = '';
 
     /**
-     * @var array|null
+     * The item hash
      */
-    public $comments = null;
-
-    /**
-     * @var string|null
-     */
-    public $lineComment = null;
+    private $hash = '';
 
     /**
      * Constructor
      *
      * @param CrontabManager $manager
-     * @param string|null    $group
+     * @param string|null $group
      */
-    public function __construct($jobSpec = null,
-                                CrontabManager $manager = null, $group = null)
+    public function __construct($jobSpec = null, CrontabManager $manager = null, $group = null)
     {
         if ($jobSpec) {
             $this->_parse($jobSpec);
@@ -138,7 +132,7 @@ class CronEntry
         if (!preg_match($regex, $jobSpec, $match)) {
             throw new \InvalidArgumentException('$jobSpec must be crontab compatibile entry');
         }
-        list(,,
+        list(, ,
             $minute,
             $hour,
             $dayOfMonth,
@@ -161,51 +155,15 @@ class CronEntry
     }
 
     /**
-     * Set root directory for relative commands
-     *
-     * @param string $root
-     */
-    public function setRootForCommands($root)
-    {
-        $this->_root = $root;
-    }
-
-    /**
-     * Set minute or minutes
+     * Set day of week or days of week
      *
      * @param string $minute required
      *
      * @return CronEntry
      */
-    public function onMinute($minute)
+    public function onDayOfWeek($day)
     {
-        $this->minute = $minute;
-        return $this;
-    }
-
-    /**
-     * Set hour or hours
-     *
-     * @param string $hour required
-     *
-     * @return CronEntry
-     */
-    public function onHour($hour)
-    {
-        $this->hour = $hour;
-        return $this;
-    }
-
-    /**
-     * Set day of month or days of month
-     *
-     * @param string $dayOfMonth required
-     *
-     * @return CronEntry
-     */
-    public function onDayOfMonth($dayOfMonth)
-    {
-        $this->dayOfMonth = $dayOfMonth;
+        $this->dayOfWeek = $day;
         return $this;
     }
 
@@ -223,16 +181,80 @@ class CronEntry
     }
 
     /**
-     * Set day of week or days of week
+     * Set day of month or days of month
+     *
+     * @param string $dayOfMonth required
+     *
+     * @return CronEntry
+     */
+    public function onDayOfMonth($dayOfMonth)
+    {
+        $this->dayOfMonth = $dayOfMonth;
+        return $this;
+    }
+
+    /**
+     * Set hour or hours
+     *
+     * @param string $hour required
+     *
+     * @return CronEntry
+     */
+    public function onHour($hour)
+    {
+        $this->hour = $hour;
+        return $this;
+    }
+
+    /**
+     * Set minute or minutes
      *
      * @param string $minute required
      *
      * @return CronEntry
      */
-    public function onDayOfWeek($day)
+    public function onMinute($minute)
     {
-        $this->dayOfWeek = $day;
+        $this->minute = $minute;
         return $this;
+    }
+
+    /**
+     * Add job to the jobs array.
+     *
+     * Add job to the jobs array. Each time segment should be set before calling
+     * this method. The job should include the absolute path to the commands
+     * being used.
+     *
+     * @param string $job required
+     * @param string|null $group optional
+     *
+     * @param bool $autoAdd
+     *
+     * @return CrontabManager
+     */
+    public function doJob($job, $group = null, $autoAdd = false)
+    {
+        $this->job = $job;
+        $this->job = preg_replace('/\\\n/m', '', $this->job);
+        if ($group) {
+            $this->group = $group;
+        }
+        if ($autoAdd && $this->_manager) {
+            $this->_manager->add($this);
+        }
+
+        return $this->_manager;
+    }
+
+    /**
+     * Set root directory for relative commands
+     *
+     * @param string $root
+     */
+    public function setRootForCommands($root)
+    {
+        $this->_root = $root;
     }
 
     /**
@@ -259,34 +281,6 @@ class CronEntry
     }
 
     /**
-     * Add job to the jobs array.
-     *
-     * Add job to the jobs array. Each time segment should be set before calling
-     * this method. The job should include the absolute path to the commands
-     * being used.
-     *
-     * @param string      $job   required
-     * @param string|null $group optional
-     *
-     * @param bool        $autoAdd
-     *
-     * @return CrontabManager
-     */
-    public function doJob($job, $group = null, $autoAdd = false)
-    {
-        $this->job = $job;
-        $this->job = preg_replace('/\\\n/m', '', $this->job);
-        if ($group) {
-            $this->group = $group;
-        }
-        if ($autoAdd && $this->_manager) {
-            $this->_manager->add($this);
-        }
-
-        return $this->_manager;
-    }
-
-    /**
      * Adds comments to this job
      *
      * @param string[] $comments
@@ -297,6 +291,55 @@ class CronEntry
     {
         $this->comments = $comments;
         return $this;
+    }
+
+    /**
+     * Render to string method
+     *
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->render(true);
+    }
+
+    /**
+     * Render to string method
+     *
+     * @return string
+     */
+    public function render($commentEntry = true)
+    {
+        if (empty($this->job)) {
+            return '';
+        }
+        $entry = array(
+            $this->minute,
+            $this->hour,
+            $this->dayOfMonth,
+            $this->month,
+            $this->dayOfWeek,
+            $this->_getFullCommand()
+        );
+        $entry = join("\t", $entry);
+        if ($commentEntry) {
+            $hash = base_convert(
+                $this->_signedInt(crc32($entry . $this->group)),
+                10, 36
+            ).uniqid();
+            $comments = is_array($this->comments) ? $this->comments : array();
+            $comments = $this->_fixComments($comments);
+            $comments = join("\n", $comments);
+            if (!empty($comments)) {
+                $comments .= "\n";
+            }
+            $entry = $comments . $entry . " # ";
+            if ($this->lineComment) {
+                $entry .= $this->lineComment . ' ';
+            }
+            $entry .= $hash;
+        }
+        return $entry;
     }
 
     /**
@@ -326,45 +369,6 @@ class CronEntry
     }
 
     /**
-     * Render to string method
-     *
-     * @return string
-     */
-    public function render($commentEntry = true)
-    {
-        if (empty($this->job)) {
-            return '';
-        }
-        $entry = array(
-            $this->minute,
-            $this->hour,
-            $this->dayOfMonth,
-            $this->month,
-            $this->dayOfWeek,
-            $this->_getFullCommand()
-        );
-        $entry = join("\t", $entry);
-        if ($commentEntry) {
-            $hash = base_convert(
-                $this->_signedInt(crc32($entry . $this->group)),
-                10, 36
-            );
-            $comments = is_array($this->comments) ? $this->comments : array();
-            $comments = $this->_fixComments($comments);
-            $comments = join("\n", $comments);
-            if (!empty($comments)) {
-                $comments .= "\n";
-            }
-            $entry = $comments . $entry . " # ";
-            if ($this->lineComment) {
-                $entry .= $this->lineComment . ' ';
-            }
-            $entry .= $hash;
-        }
-        return $entry;
-    }
-
-    /**
      * Gets signed int from unsigned 64bit int
      *
      * @param integer $in
@@ -380,10 +384,10 @@ class CronEntry
         }
         return $out;
     }
-    
+
     /**
      * Fix comments by adding # sign
-     * 
+     *
      * @param array $comments
      * @return array
      */
@@ -400,12 +404,11 @@ class CronEntry
     }
 
     /**
-     * Render to string method
-     *
+     * Get the unique hash of the crontab object
      * @return string
      */
-    public function __toString()
+    public function getHash()
     {
-        return $this->render(true);
+        return $this->hash;
     }
 }

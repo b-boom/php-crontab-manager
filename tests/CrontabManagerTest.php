@@ -40,7 +40,7 @@ class CrontabManagerTest extends \PHPUnit_Framework_TestCase
     public function testNewJob()
     {
         $job = $this->object->newJob();
-        $this->assertInstanceOf('php\manager\crontab\CronEntry', $job);
+        $this->assertInstanceOf('Crontab\CronEntry', $job);
         $actual = $job->render();
         $expected = '';
         $this->assertEquals($expected, $actual);
