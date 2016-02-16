@@ -36,10 +36,6 @@ namespace Crontab;
 class CronEntry
 {
     /**
-     * @var string|null
-     */
-    public $lineComment = null;
-    /**
      * Minute (0 - 59)
      *
      * @var string
@@ -128,6 +124,7 @@ class CronEntry
         if (!preg_match($regex, $jobSpec, $match)) {
             throw new \InvalidArgumentException('$jobSpec must be crontab compatibile entry');
         }
+        dd($match);
         list(, ,
             $minute,
             $hour,
@@ -311,10 +308,7 @@ class CronEntry
                         10, 36
                     ) . uniqid();
             }
-            if ($this->lineComment) {
-                $entry .= $this->lineComment . ' ';
-            }
-            $entry .= $this->hash;
+            $entry .= ' # ' . $this->hash;
         }
         return $entry;
     }
