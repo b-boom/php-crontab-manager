@@ -36,10 +36,6 @@ namespace Crontab;
 class CronEntry
 {
     /**
-     * @var array|null
-     */
-    public $comments = null;
-    /**
      * @var string|null
      */
     public $lineComment = null;
@@ -132,6 +128,7 @@ class CronEntry
         if (!preg_match($regex, $jobSpec, $match)) {
             throw new \InvalidArgumentException('$jobSpec must be crontab compatibile entry');
         }
+        dd($match);
         list(, ,
             $minute,
             $hour,
@@ -139,10 +136,9 @@ class CronEntry
             $month,
             $dayOfWeek,
             $command) = $match;
-        if (isset($match[8])) {
-            $lineComment = $match[8];
-            $this->lineComment = trim($lineComment);
-        }
+        //Set the old hash as hash
+        $lineComment = $match[8];
+        $this->hash = trim($lineComment);
         $this
             ->onMinute($minute)
             ->onHour($hour)
@@ -281,19 +277,6 @@ class CronEntry
     }
 
     /**
-     * Adds comments to this job
-     *
-     * @param string[] $comments
-     *
-     * @return CronEntry
-     */
-    public function addComments(array $comments)
-    {
-        $this->comments = $comments;
-        return $this;
-    }
-
-    /**
      * Render to string method
      *
      * @return string
@@ -323,17 +306,12 @@ class CronEntry
         );
         $entry = join("\t", $entry);
         if ($commentEntry) {
-            $this->hash = base_convert(
-                $this->_signedInt(crc32($entry . $this->group)),
-                10, 36
-            ).uniqid();
-            $comments = is_array($this->comments) ? $this->comments : array();
-            $comments = $this->_fixComments($comments);
-            $comments = join("\n", $comments);
-            if (!empty($comments)) {
-                $comments .= "\n";
+            if(strlen($this->hash) <= 0) {
+                $this->hash = base_convert(
+                        $this->_signedInt(crc32($entry . $this->group)),
+                        10, 36
+                    ) . uniqid();
             }
-            $entry = $comments . $entry . " # ";
             if ($this->lineComment) {
                 $entry .= $this->lineComment . ' ';
             }
