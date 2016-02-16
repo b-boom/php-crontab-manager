@@ -323,7 +323,7 @@ class CronEntry
         );
         $entry = join("\t", $entry);
         if ($commentEntry) {
-            $hash = base_convert(
+            $this->hash = base_convert(
                 $this->_signedInt(crc32($entry . $this->group)),
                 10, 36
             ).uniqid();
@@ -337,7 +337,7 @@ class CronEntry
             if ($this->lineComment) {
                 $entry .= $this->lineComment . ' ';
             }
-            $entry .= $hash;
+            $entry .= $this->hash;
         }
         return $entry;
     }
